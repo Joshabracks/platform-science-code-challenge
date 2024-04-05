@@ -1,0 +1,23 @@
+{
+  "name": "platform_science_code_challenge",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "scripts": {
+    "start": "node ./build/index.js",
+    "build-and-start": "tsc && npm start",
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "lint": "eslint src --ext .ts",
+    "test": "tsc && node ./test/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.7",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^7.1.0"
+  },
+  "author": "Joshua Bracks",
+  "license": "ISC"
+}
