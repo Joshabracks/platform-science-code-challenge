@@ -1,6 +1,6 @@
 import path from "path";
 import { loadFileAsString } from "./file";
-import { DRIVER_NAMES } from "./const";
+import { DRIVER_NAMES } from "./env";
 
 interface Driver {
   name: string;         // as it is respresented in the file,

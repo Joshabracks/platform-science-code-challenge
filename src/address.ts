@@ -1,6 +1,6 @@
 import path from 'path';
 import { loadFileAsString } from "./file";
-import { STREET_ADDRESSES } from "./const";
+import { STREET_ADDRESSES } from "./env";
 
 // Define Address parts to avoid type based errrors
 interface Address {
