@@ -1,18 +1,17 @@
 import { Driver } from "./driver";
 import { Address } from "./address";
 
-const VOWELS = "aeiouAEIOU";
-
 /**
  * Gets the number of vowels in a word
  * @param word
  * @returns number
  */
 function countVowels(word: string): number {
+  const vowels = "aeiouAEIOU";
   let count = 0;
   for (let i = 0; i < word.length; i++) {
     const char = word.charAt(i);
-    if (VOWELS.indexOf(char) !== -1 && char !== " ") {
+    if (vowels.indexOf(char) !== -1 && char !== " ") {
       count++;
     }
   }
@@ -61,14 +60,17 @@ function suitabilityScore(driver: Driver, destination: Address): number {
     : driver.nameCondensed.length - vowels; // consonants
   const baseMultiplier: number = streetNameIsEven ? 1.5 : 1;
   const base: number = baseLetterCount * baseMultiplier;
+
   // Determine if common factors exist
   const streetNameLength: number = destination.street.length;
   const driverNameLength: number = driver.name.length;
   const gcd: number = greatestCommonDivisor(streetNameLength, driverNameLength);
   const hasCommonFactors: boolean =
     gcd > 1 && gcd !== streetNameLength && gcd !== driverNameLength;
-  // set suitability score and apply 50% increase if common factors exist
+
+    // set suitability score and apply 50% increase if common factors exist
   const ss: number = hasCommonFactors ? base * 1.5 : base;
+
   return ss;
 }
 
