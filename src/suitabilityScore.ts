@@ -55,15 +55,15 @@ function suitabilityScore(driver: Driver, destination: Address): number {
 
   // Determine base score
   const streetNameIsEven: boolean = destination.street.length % 2 ? false : true;
-  const vowels = countVowels(driver.name);
+  const vowels: number = countVowels(driver.name);
   const baseLetterCount: number = streetNameIsEven
     ? vowels
-    : driver.nameCondensed.length - vowels;
+    : driver.nameCondensed.length - vowels; // consonants
   const baseMultiplier: number = streetNameIsEven ? 1.5 : 1;
   const base: number = baseLetterCount * baseMultiplier;
   // Determine if common factors exist
-  const streetNameLength = destination.street.length;
-  const driverNameLength = driver.name.length;
+  const streetNameLength: number = destination.street.length;
+  const driverNameLength: number = driver.name.length;
   const gcd: number = greatestCommonDivisor(streetNameLength, driverNameLength);
   const hasCommonFactors: boolean =
     gcd > 1 && gcd !== streetNameLength && gcd !== driverNameLength;

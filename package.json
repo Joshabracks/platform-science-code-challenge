@@ -4,7 +4,7 @@
   "description": "",
   "main": "build/index.js",
   "scripts": {
-    "start": "node ./build/index.js",
+    "start": "node --env-file .env -e \"require('./build/index.js').runAssignments()\"",
     "build-and-start": "tsc && npm start",
     "build": "tsc",
     "build:watch": "tsc -w",

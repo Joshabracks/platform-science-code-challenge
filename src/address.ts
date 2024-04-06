@@ -1,9 +1,10 @@
-import { loadFileAsString } from "./file";
 import path from 'path';
+import { loadFileAsString } from "./file";
+import { STREET_ADDRESSES } from "./const";
 
 // Define Address parts to avoid type based errrors
 interface Address {
-  full: string;   // full address as it presented in the source file
+  full: string;   // as it presented in the source file
   number: number; // street address number
   street: string; // street name
   city: string;   // city name
@@ -25,7 +26,7 @@ enum AddressPart {
  */
 function getStreetAddresses(): Address[] {
   // Get file
-  const filePath = path.resolve(__dirname, "../data/StreetAddresses.txt");
+  const filePath = path.resolve(__dirname, STREET_ADDRESSES);
   const file = loadFileAsString(filePath);
   if (typeof file !== "string") {
     console.error(file);

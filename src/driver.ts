@@ -1,9 +1,10 @@
-import { loadFileAsString } from "./file";
 import path from "path";
+import { loadFileAsString } from "./file";
+import { DRIVER_NAMES } from "./const";
 
 interface Driver {
-  name: string;         // full name as it is respresented in the file,
-  nameCondensed: string // full name with white-space and special characters removed
+  name: string;         // as it is respresented in the file,
+  nameCondensed: string // white-space and special characters removed
 }
 
 /**
@@ -12,22 +13,22 @@ interface Driver {
  */
 function getDrivers(): Driver[] {
   // Get file
-  const filePath = path.resolve(__dirname, "../data/DriverNames.txt");
+  const filePath = path.resolve(__dirname, DRIVER_NAMES);
   const file = loadFileAsString(filePath);
   if (typeof file !== "string") {
     console.error(file);
     return [];
   }
   // Format drivers
-  const driverNames = file.split("\n").map((line: string) => {
+  const drivers = file.split("\n").map((line: string) => {
     const nameTrimmed = line.trim();
     const driver: Driver = {
       name: nameTrimmed,
-      nameCondensed: nameTrimmed.replace(/[^A-Za-z]/g, '')
+      nameCondensed: nameTrimmed.replace(/[^A-Za-z]/g, '').toLowerCase()
     };
     return driver;
   });
-  return driverNames;
+  return drivers;
 }
 
 export { getDrivers, Driver };
