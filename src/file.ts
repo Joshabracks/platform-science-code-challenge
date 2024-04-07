@@ -14,7 +14,7 @@ function loadFileAsString(filePath: string): {
     return {
       result: "",
       err: new Error(
-        `Cannot load file at "${filePath}". \n File does not exist`
+        `Cannot load file at "${filePath}". \n \u001b[31mFile does not exist\u001b[0m`
       ),
     };
   }

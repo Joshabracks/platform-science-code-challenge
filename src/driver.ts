@@ -20,7 +20,7 @@ function getDrivers(driverInput: string = ''): Driver[] {
     const filePath = path.resolve(__dirname, DRIVER_NAMES);
     const {result, err} = loadFileAsString(filePath)
     if (err) {
-      console.error(driverInput);
+      console.error(err);
       return [];
     }
     driverInput = result;

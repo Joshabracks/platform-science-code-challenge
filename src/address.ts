@@ -32,7 +32,7 @@ function getStreetAddresses(addressInput: string = ""): Address[] {
     const filePath = path.resolve(__dirname, STREET_ADDRESSES);
     const { result, err } = loadFileAsString(filePath);
     if (err) {
-      console.error(addressInput);
+      console.error(err);
       return [];
     }
     addressInput = result;

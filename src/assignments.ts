@@ -28,8 +28,12 @@ interface Assignments {
 
 /**
  * Loads Drivers and Addresses from files and matches by suitability score ratings starting from highest to lowest possible score
+ * @param driverInput string (OPTIONAL) - Line separated list of driver names
+ *                    if not provided, the program will attempt to fetch the value from .env or default specified files
+ * @param addressInput  string (OPTIONAL) - Line separated list of destination street addresses
+ *                    if not provided, the program will attempt to fetch the value form .env or default specified files
  * @returns:
- *    matches: Array { driver: string, address: string, score: number }
+ *    matches: DriverAddressMatch[]   set of driver / address matches with suitablity scores
  *    leftoverDrivers: Driver[]       remaining drivers if number of drivers is greater than addresses
  *    leftoverAddressess: Address[]   remaining addressess if number of addresses is greater than drivers
  */
@@ -118,16 +122,37 @@ function runAssignments(
   streetAddresses: string = "",
   log: boolean = false
 ): Assignments {
+  // determine if streetAddresses and driverNames are input file names or input data
+  const isFileRegExp = /\w+\.\w+$/;
+  const driverInput = driverNames.trim().match(isFileRegExp) ? "" : driverNames;
+  const addressInput = streetAddresses.trim().match(isFileRegExp)
+    ? ""
+    : streetAddresses;
+
   // update input filepath parameters
-  if (driverNames) {
+  if (driverNames && !driverInput) {
     setDriverInput(driverNames);
   }
-  if (streetAddresses) {
+  if (streetAddresses && !addressInput) {
     setStreetAddressesInput(streetAddresses);
   }
+  // process input files and/or input data
+  const assignments: Assignments = getAssignments(driverInput, addressInput);
 
-  // process input files
-  const assignments: Assignments = getAssignments();
+  // log error if no assignments or leftovers
+  if (
+    assignments.matches.length +
+      assignments.leftoverAddresses.length +
+      assignments.leftoverDrivers.length ===
+    0
+  ) {
+    console.error(
+      "\u001b[31m",
+      "No assignments made due to bad or no data",
+      "\u001b[0m"
+    );
+    return assignments;
+  }
 
   // export and/or log results
   if (log) {
