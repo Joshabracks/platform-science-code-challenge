@@ -89,3 +89,7 @@ node -e "require('./build/index.js').runAssignments(false, '', 'Fake Name', '888
 node -e "require('./build/index.js').runAssignments(true, '', '../data/AltDriverNames.txt', '../data/AltStreetAddresses.txt', false)"
 ```
 
+### Development and Unit Testing
+- run unit test: `npm run test`
+  - The unit test runs a group of verified driver/address pairs against the [suitabilityScore](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/suitabilityScore.ts#L44) function.  If any unexpected values occur, they will be logged to the console.  Otherwise, it'll show that all passed.  Any updates to the `suitabilityScore` may end in failed cases.  If this happens, either the [cases](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/test/index.js#L8) need to be re-evaluated (due to an updated "top-secret" algorithm) or the function is not operating as intended and needs to be fixed.
+- run lint: `npm run lint`
