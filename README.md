@@ -1,5 +1,11 @@
 # Platform Science Code Challenge Submission
-This Submission is written primarily in **TypeScript** with the unit tests written in **JavaScript**.  For my won testing purposes, I slightly extended the scope of the project to allow for some environmental editing, extra CLI inputs and unit testing.  Also, as I'm used to writing in-house tools and SDKs, I designed the project as a package that can be imported or published (though I did not publish it).  I know that this isn't going to be used outside of the challenge, but it's how I would design a project like this if I were doing so normally.  
+This Submission is written primarily in **TypeScript** with the unit tests written in **JavaScript**.  For my won testing purposes, I slightly extended the scope of the project to allow for some environmental editing, extra CLI inputs and unit testing.  Also, as I'm used to writing in-house tools and SDKs, I designed the project as a package that can be imported or published (though I did not publish it).  I know that this isn't going to be used outside of the challenge, but it's how I would design a project like this if I were doing so normally.
+
+Most of the matching logic is spread across the [suitabilityScore](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/suitabilityScore.ts#L44) function, which determines the SS for a given driver/address pair and the [getAssignments](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L40) function, which determines what driver ultimately gets sent to what address.  The `suitabilityScore` function follows the "top-secret-algorithm" logic.  The `getAssignments` function sorts drivers like so:
+ - Get the highest possible SS pair for each driver
+ - Pick the highest ranking driver/address pair
+ - Add the pair to the result and remove them both from the ranking process
+ - Repeat the process from step 1 until there are no more possible pairs
 
 ### Requirements
 - **node version 20 or higher** is reccommended to make use of all available features.  (Specifically environment changes via the .env file)

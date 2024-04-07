@@ -140,12 +140,7 @@ function runAssignments(
   const assignments: Assignments = getAssignments(driverInput, addressInput);
 
   // log error if no assignments or leftovers
-  if (
-    assignments.matches.length +
-      assignments.leftoverAddresses.length +
-      assignments.leftoverDrivers.length ===
-    0
-  ) {
+  if ( assignments.matches.length + assignments.leftoverAddresses.length + assignments.leftoverDrivers.length === 0 ) {
     console.error(
       "\u001b[31m",
       "No assignments made due to bad or no data",
