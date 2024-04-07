@@ -1,5 +1,6 @@
 # Platform Science Code Challenge Submission
-This Submission is written primarily in **TypeScript** with the unit tests written in **JavaScript** on .
+This Submission is written primarily in **TypeScript** with the unit tests written in **JavaScript**.  For my won testing purposes, I slightly extended the scope of the project to allow for some environmental editing, extra CLI inputs and unit testing.  Also, as I'm used to writing in-house tools and SDKs, I designed the project as a package that can be imported or published (though I did not publish it).  I know that this isn't going to be used outside of the challenge, but it's how I would design a project like this if I were doing so normally.  
+
 ### Requirements
 - **node version 20 or higher** is reccommended to make use of all available features.  (Specifically environment changes via the .env file)
 - **node version 18** or higher can be used with most features
