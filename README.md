@@ -1,5 +1,5 @@
 # Platform Science Code Challenge Submission
-This Submission is written primarily in **TypeScript** with the unit tests written in **JavaScript**.  For my won testing purposes, I slightly extended the scope of the project to allow for some environmental editing, extra CLI inputs and unit testing.  Also, as I'm used to writing in-house tools and SDKs, I designed the project as a package that can be imported or published (though I did not publish it).  I know that this isn't going to be used outside of the challenge, but it's how I would design a project like this if I were doing so normally.
+This Submission is written primarily in **TypeScript** with the unit tests written in **JavaScript**.  For my own testing purposes, I slightly extended the scope of the project to allow for some environmental editing, extra CLI inputs and unit testing.  Also, as I'm used to writing in-house tools and SDKs, I designed the project as a package that can be imported or published (though I did not publish it).  I know that this isn't going to be used outside of the challenge, but it's how I would design a project like this if I were doing so within an organization.
 
 Most of the matching logic is spread across the [suitabilityScore](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/suitabilityScore.ts#L44) function, which determines the SS for a given driver/address pair and the [getAssignments](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L40) function, which determines what driver ultimately gets sent to what address.  The `suitabilityScore` function follows the "top-secret-algorithm" logic.  The `getAssignments` function sorts drivers like so:
  - Get the highest possible SS pair for each driver
@@ -8,7 +8,7 @@ Most of the matching logic is spread across the [suitabilityScore](https://githu
  - Repeat the process from step 1 until there are no more possible pairs
 
 ### Requirements
-- **node version 20 or higher** is reccommended to make use of all available features.  (Specifically environment changes via the .env file)
+- **node version 20 or higher** is reccomended to make use of all available features.  (Specifically environment changes via the .env file)
 - **node version 18** or higher can be used with most features
 
 ### Installation
@@ -45,13 +45,12 @@ Under the data folder, you'll find two files:
   - **OUTPUT**: the output target to export results to
   - **STREET_ADDRESSES**: the input target for destination street address data
   - **DRIVER_NAMES**: the input target for destination driver names
-- ***NOTE:*** If either of the input targets (DRIVER_NAMES or STREET_ADDRESSES) are updated, make sure the input files are available exactly where they have been directed to, or the program will have errors.
+- ***NOTE:*** If either of the input targets (DRIVER_NAMES or STREET_ADDRESSES) are updated, make sure the input files are available exactly where they have been directed to, or the program will have errors. 
 - Once you've made your preferred updates, you must use `npm run start:env` to run the program and access the .env file settings.
 
 ### Use as a Dependancy
 - The package is not published, but you can access it via other packages by pointing your depencencies to the `index.js` file located within the build folder by editing your project's `package.json` dependencies.  Keep in mind that this will only work for locally compiled builds.
 ```json
-    ...
     "dependencies": {
         "platform-science-code-challenge": "<absolute path to this repo>/build/index.js"
     }
@@ -60,8 +59,8 @@ Under the data folder, you'll find two files:
 - [getAssignments](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L36): Loads Drivers and Addresses from files and matches by suitability score ratings starting from highest to lowest possible score
 
   - **parameters**: 
-    - **driverInput**: string (OPTIONAL) - Line separated list of driver names.  if not provided, the program will attempt to fetch the value from .env or default specified files
-    - **addressInput**:  string (OPTIONAL) - Line separated list of destination street addresses. if not provided, the program will attempt to fetch the value form .env or default specified files
+    - **driverInput**: string (OPTIONAL) - Line separated list of driver names or file path.  if not provided, the program will attempt to fetch the value from .env or default specified files.  If a filepath is given, the file must have a file extension, or it the program will attempt to read it as a list instead of fetching from the file.
+    - **addressInput**:  string (OPTIONAL) - Line separated list of destination street addresses or filepath. if not provided, the program will attempt to fetch the value form .env or default specified files.  If a filepath is given, the file must have a file extension, or it the program will attempt to read it as a list instead of fetching from the file.
   - **returns**: [Assignments](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L23)
     - **matches**: [DriverAddressMatch](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L16)[ ] - set of driver / address matches with suitablity scores
     - **leftoverDrivers**: [Driver](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/driver.ts#L6)[ ] - remaining drivers if number of drivers is greater than addresses
@@ -91,7 +90,7 @@ node -e "require('./build/index.js').runAssignments(true, '../alt_output.json', 
 ```
 node -e "require('./build/index.js').runAssignments(false, '', 'Fake Name', '888 Fake Lane, Fake City, CA, 55555', true)"
 ```
-- gets data from alternate input files and saves to default output file
+- gets data from alternate input files and saves to default output file.  In order for this example to work, you would have to add the appropriate input files `AltStreetAddresses.txt` and `AltDriverNames.txt` to the `./data` folder.  If the files do not exist, an appropriate error will show in console.
 ```
 node -e "require('./build/index.js').runAssignments(true, '', '../data/AltDriverNames.txt', '../data/AltStreetAddresses.txt', false)"
 ```
