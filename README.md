@@ -2,10 +2,11 @@
 This Submission is written primarily in **TypeScript** with the unit tests written in **JavaScript**.  For my own testing purposes, I slightly extended the scope of the project to allow for some environmental editing, extra CLI inputs and unit testing.  Also, as I'm used to writing in-house tools and SDKs, I designed the project as a package that can be imported or published (though I did not publish it).  I know that this isn't going to be used outside of the challenge, but it's how I would design a project like this if I were doing so within an organization.
 
 Most of the matching logic is spread across the [suitabilityScore](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/suitabilityScore.ts#L44) function, which determines the SS for a given driver/address pair and the [getAssignments](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L40) function, which determines what driver ultimately gets sent to what address.  The `suitabilityScore` function follows the "top-secret-algorithm" logic.  The `getAssignments` function sorts drivers like so:
- - Get the highest possible SS pair for each driver
- - Pick the highest ranking driver/address pair
- - Add the pair to the result and remove them both from the ranking process
- - Repeat the process from step 1 until there are no more possible pairs
+ - Determine all possible driver/address group permutations
+ - Determine the combined suitability scores for all groups
+ - return the group with the highest combined suitability scores
+
+This method does not account for an un-even number of drivers and addresses and will treat both lists (drivers and addresses) as separate queues.  If a greater number of addresses, are given than drivers, the algorithm will ignore addresses that are further down the queue than there are drivers. (and vise versa)  Because of this, queues should be managed outside of this application to ensure some level of fairness for drivers.  (Likely a queue that prioritises drivers who have gone longest without jobs)
 
 ### Requirements
 - **node version 20 or higher** is reccomended to make use of all available features.  (Specifically environment changes via the .env file)
@@ -36,9 +37,7 @@ Under the data folder, you'll find two files:
 - To run the program with default settings, use `npm start`
   - This will get data from the `./data/DriverNames.txt` and `./data/StreetAddresses.txt` and process assignments accordingly, then export the results to an `./output.json` file at the root level.  ***If the output file already exists, it will be overwritten.***
 - The results in the output file include the following:
-  - **matches**: An array of driver/address matches along with their suitability scores
-  - **leftoverDrivers**: an array of any drivers that were not matched due to there being more addresses than drivers.
-  - **leftoverAddresses**: an array of any addresses that were not matched due to there being more drivers than addresses
+  - **matches**: An array of driver/address matches along with their suitability
 
 ### .env Operation
 - If you are using node version 20 or higher, you may edit the input and output filepaths via the .env file. All of the editable values are filepaths which are aimed at the `./build` folder.  The .env file provided in the project is already populated with the project's default values.
@@ -61,11 +60,8 @@ Under the data folder, you'll find two files:
   - **parameters**: 
     - **driverInput**: string (OPTIONAL) - Line separated list of driver names or file path.  if not provided, the program will attempt to fetch the value from .env or default specified files.  If a filepath is given, the file must have a file extension, or it the program will attempt to read it as a list instead of fetching from the file.
     - **addressInput**:  string (OPTIONAL) - Line separated list of destination street addresses or filepath. if not provided, the program will attempt to fetch the value form .env or default specified files.  If a filepath is given, the file must have a file extension, or it the program will attempt to read it as a list instead of fetching from the file.
-  - **returns**: [Assignments](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L23)
-    - **matches**: [DriverAddressMatch](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L16)[ ] - set of driver / address matches with suitablity scores
-    - **leftoverDrivers**: [Driver](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/driver.ts#L6)[ ] - remaining drivers if number of drivers is greater than addresses
-    - **leftoverAddressess**: [Address](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/address.ts#L6)[ ] - remaining addressess if number of addresses is greater than drivers
- 
+  - **returns**: [DriverAddressMatch](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L16)[ ] - set of driver / address matches with suitablity scores
+
 - [runAssignments](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L36): Gets StreetAddress and Driver values from files or pre-set values and creates assigns drivers to destination addresses at a 1 to 1 ration, as available Assignments (along with any leftover drivers or addresses) are thn either logged to console and/or exported to a file and returned
   - **parameters**:
     - **out**: boolean - when set to true, results are exported to a file at the OUTPUT_FILE path in json format.  default OUTPUT_FILE value is "../output.json" which targets the root level of the project.  (Parent level of the project build)
@@ -73,10 +69,7 @@ Under the data folder, you'll find two files:
     - **driverNames**: string - changes the input file path for driver names.  This can also be set in the .env file as DRIVER_NAMES. default DRIVER_NAMES value is '../data/DriverNames.txt' which targets the data folder of the project level (Sibling level of the project build)
     - **streetAddresses**: string - changes in input file path for street addresses.  This can also be set in the .env file as STREET_ADDRESSES. default STREET_ADDRESSES value is '../data/StreetAddresses.txt' which targets the data folder of the project level (Sibling level of the project build)
     - **log**: boolean - if set to true, results will be logged to the console
-  - **returns**: [Assignments](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L23)
-    - **matches**: [DriverAddressMatch](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L16)[ ] - set of driver / address matches with suitablity scores
-    - **leftoverDrivers**: [Driver](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/driver.ts#L6)[ ] - remaining drivers if number of drivers is greater than addresses
-    - **leftoverAddressess**: [Address](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/address.ts#L6)[ ] - remaining addressess if number of addresses is greater than drivers
+  - **returns**: [DriverAddressMatch](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L16)[ ] - set of driver / address matches with suitablity scores
 
 ### Advanced CLI commands
 node allows exported functions to be run directly from the command line.  As a result, you can run the `runAssignments` function from the cli using `node -e` command.  (see the [package.json](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/package.json#L11) "start" script for a simple example).  The syntax for calling the function is JavaScript and must start by requiring the file you wish to export from.  (In this case, it is `./build/index.js`)
