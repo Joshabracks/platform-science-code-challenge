@@ -6,7 +6,7 @@ import { STREET_ADDRESSES } from "./env";
  * Formats string input for Addresses
  * @param addressInput  string - String input to be formatted into array of Addresses
  *                      If value is not supplied, the program will attempt to retrieve the input via a file path configured at environment level
- * @returns Array of Address objects
+ * @returns Array of Address strings
  */
 function getStreetAddresses(addressInput: string = ""): string[] {
   if (!addressInput) {

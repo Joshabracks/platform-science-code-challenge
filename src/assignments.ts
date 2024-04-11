@@ -13,27 +13,34 @@ interface DriverAddressMatch {
 
 /**
  * Helper function to get possible driver/address combinations by index
- * @param addressCount  number - the number of addresses
- * @param driverCount   number - the number of drivers
- * @param current number[] (default []) Do not set this value
- * @returns   array of number arrays that represent driver/address combinations
+ * @param addresses   string[] Array of address
+ * @param drivers     string[] Array of driver names
+ * @param _current number[] (default []) Do not set this value
+ * @returns   array of suitability scores and number arrays that represent driver/address combinations
  *            The place in the array represents the driver index and the actual number represents the address index
  */
-function getNumericalCombinations(
+function getCombinationsAndSuitabilityScores(
   drivers: string[],
   addresses: string[],
-  current: number[] = [],
-): number[][] {
-  if (current.length === drivers.length) {
-    return [current];
+  _current: number[] = []
+): { ss: number; matches: number[] }[] {
+  if (_current.length === drivers.length) {
+    // Permutation list is complete.  Calculate SS and return list with SS
+    const ss = _current.reduce((result, addressIndex, driverIndex) => {
+      return (
+        result + suitabilityScore(drivers[driverIndex], addresses[addressIndex])
+      );
+    }, 0);
+    return [{ ss, matches: _current }];
   }
-  let results: number[][] = [];
+  // Compile permutation lists recursively
+  let results: { ss: number; matches: number[] }[] = [];
   for (let i = 0; i < addresses.length; i++) {
-    if (current.indexOf(i) === -1) {
-      const next = structuredClone(current);
+    if (_current.indexOf(i) === -1) {
+      const next = structuredClone(_current);
       next.push(i);
       results = results.concat(
-        getNumericalCombinations(drivers, addresses, next)
+        getCombinationsAndSuitabilityScores(drivers, addresses, next)
       );
     }
   }
@@ -47,53 +54,41 @@ function getNumericalCombinations(
  * @param addressInput  string (OPTIONAL) - Line separated list of destination street addresses
  *                    if not provided, the program will attempt to fetch the value form .env or default specified files
  * @returns:
- *    matches: DriverAddressMatch[]   set of driver / address matches with suitablity scores
- *    leftoverDrivers: Driver[]       remaining drivers if number of drivers is greater than addresses
- *    leftoverAddressess: Address[]   remaining addressess if number of addresses is greater than drivers
+ *    ss: number - total suitability score
+ *    matches: DriverAddressMatch[]   set of driver / address matches with
  */
 function getAssignments(
   driverInput: string = "",
   addressInput: string = ""
-): {ss: number, matches: DriverAddressMatch[]} {
+): { ss: number; matches: DriverAddressMatch[] } {
   // get drivers and addresses from files
   const drivers: string[] = getDrivers(driverInput);
   const addresses: string[] = getStreetAddresses(addressInput);
-  const possibleCombinations = getNumericalCombinations(
+  const possibleCombinations = getCombinationsAndSuitabilityScores(
     drivers,
     addresses
   );
 
+  // Tally sum of suitability scores for each permutation and assign the top score/index
   let topIndex = 0;
   let topScore = 0;
-  // Tally sum of suitability scores for each permutation and assign the top score/index
   possibleCombinations.forEach((combination, index) => {
-    let totalScore: number = 0;
-    for (let driverIndex = 0; driverIndex < combination.length; driverIndex++) {
-      const addressIndex = combination[driverIndex];
-      const ss = suitabilityScore(
-        drivers[driverIndex],
-        addresses[addressIndex]
-      );
-      totalScore += ss;
-    }
-    if (totalScore > topScore) {
+    if (combination.ss > topScore) {
+      topScore = combination.ss;
       topIndex = index;
-      topScore = totalScore;
     }
   });
+
   // Compile and return matches with scores
-  const matches: DriverAddressMatch[] = possibleCombinations[topIndex].map(
-    (addressIndex, driverIndex) => {
-      return {
-        driver: drivers[driverIndex] || '',
-        address: addresses[addressIndex],
-        suitabilityScore: suitabilityScore(
-          drivers[driverIndex],
-          addresses[addressIndex]
-        ),
-      };
-    }
-  );
+  const matches: DriverAddressMatch[] = possibleCombinations[
+    topIndex
+  ].matches.map((addressIndex, driverIndex) => {
+    return {
+      driver: drivers[driverIndex] || "",
+      address: addresses[addressIndex] || "",
+    };
+  });
+
   return { ss: topScore, matches };
 }
 
@@ -109,11 +104,9 @@ function getAssignments(
  * @param streetAddresses string - changes in input file path for street addresses.  This can also be set in the .env file as STREET_ADDRESSES
  *                        default STREET_ADDRESSES value is '../data/StreetAddresses.txt' which targets the data folder of the project level (Sibling level of the project build)
  * @param log boolean - if set to true, results will be logged to the console
- * @returns Assignments {
- *            matches: DriverAddressMatch[];
- *            leftoverDrivers: Driver[];
- *            leftoverAddresses: Address[];
- *          }
+ * @returns 
+ *    ss: number - total suitability score
+ *    matches: DriverAddressMatch[]   set of driver / address matches with
  */
 function runAssignments(
   out: boolean = false,
@@ -121,7 +114,7 @@ function runAssignments(
   driverNames: string = "",
   streetAddresses: string = "",
   log: boolean = false
-): {ss: number, matches: DriverAddressMatch[]} {
+): { ss: number; matches: DriverAddressMatch[] } {
   // determine if streetAddresses and driverNames are input file names or input data
   const isFileRegExp = /\w+\.\w+$/;
   const driverInput = driverNames.trim().match(isFileRegExp) ? "" : driverNames;
@@ -137,10 +130,7 @@ function runAssignments(
     setStreetAddressesInput(streetAddresses);
   }
   // process input files and/or input data
-  const assignments = getAssignments(
-    driverInput,
-    addressInput
-  );
+  const assignments = getAssignments(driverInput, addressInput);
 
   // log error if no assignments or leftovers
   if (assignments.matches.length === 0) {

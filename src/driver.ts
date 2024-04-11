@@ -4,9 +4,9 @@ import { DRIVER_NAMES } from "./env";
 
 /**
  * Formats string input for Drivers
- * @param addressInput  string - String input to be formatted into array of Drivers
+ * @param driverInput  string - String input to be formatted into array of Drivers
  *                      If value is not supplied, the program will attempt to retrieve the input via a file path configured at environment level
- * @returns array of Driver objects
+ * @returns array of Driver strings
  */
 function getDrivers(driverInput: string = ''): string[] {
   if (!driverInput) {
