@@ -5,13 +5,6 @@ import { getDrivers, Driver } from "./driver";
 import { OUTPUT_FILE, setDriverInput, setStreetAddressesInput } from "./env";
 import { suitabilityScore } from "./suitabilityScore";
 
-// set of indices and score for
-interface SuitabilityMatch {
-  driver: number;
-  address: number;
-  score: number;
-}
-
 // driver/address matches to be returned in final getAssignment results
 interface DriverAddressMatch {
   driver: string;
@@ -19,11 +12,33 @@ interface DriverAddressMatch {
   suitabilityScore: number;
 }
 
-// return object format for getAssignments
-interface Assignments {
-  matches: DriverAddressMatch[];
-  leftoverDrivers: Driver[];
-  leftoverAddresses: Address[];
+/**
+ * Helper function to get possible driver/address combinations by index
+ * @param addressCount  number - the number of addresses
+ * @param driverCount   number - the number of drivers
+ * @param current number[] (default []) Do not set this value
+ * @returns   array of number arrays that represent driver/address combinations
+ *            The place in the array represents the driver index and the actual number represents the address index
+ */
+function getNumericalCombinations(
+  addressCount: number,
+  driverCount: number,
+  current: number[] = []
+): number[][] {
+  if (current.length === driverCount) {
+    return [current];
+  }
+  let results: number[][] = [];
+  for (let i = 0; i < addressCount; i++) {
+    if (current.indexOf(i) === -1) {
+      const next = structuredClone(current);
+      next.push(i);
+      results = results.concat(
+        getNumericalCombinations(addressCount, driverCount, next)
+      );
+    }
+  }
+  return results;
 }
 
 /**
@@ -40,61 +55,47 @@ interface Assignments {
 function getAssignments(
   driverInput: string = "",
   addressInput: string = ""
-): Assignments {
+): DriverAddressMatch[] {
   // get drivers and addresses from files
-  let drivers: Driver[] = getDrivers(driverInput);
-  let addressess: Address[] = getStreetAddresses(addressInput);
+  const drivers: Driver[] = getDrivers(driverInput);
+  const addresses: Address[] = getStreetAddresses(addressInput);
+  const possibleCombinations = getNumericalCombinations(
+    drivers.length,
+    addresses.length
+  );
 
-  const matches: DriverAddressMatch[] = []; // resulting array of matches to be returned as "matches" in return object
-  while (drivers.length && addressess.length) {
-    // Get highest possible SS for each driver
-    const topSuitabilityMatches: SuitabilityMatch[] = [];
-    drivers.forEach((driver: Driver, driverIndex: number) => {
-      let topSuitabilityMatch: SuitabilityMatch = {
-        driver: -1,
-        address: -1,
-        score: -1,
+  let topIndex = 0;
+  let topScore = 0;
+  // Tally sum of suitability scores for each permutation and assign the top score/index
+  possibleCombinations.forEach((combination, index) => {
+    let totalScore: number = 0;
+    for (let driverIndex = 0; driverIndex < combination.length; driverIndex++) {
+      const addressIndex = combination[driverIndex];
+      const ss = suitabilityScore(
+        drivers[driverIndex],
+        addresses[addressIndex]
+      );
+      totalScore += ss;
+    }
+    if (totalScore > topScore) {
+      topIndex = index;
+      topScore = totalScore;
+    }
+  });
+  // Compile and return matches with scores
+  const matches: DriverAddressMatch[] = possibleCombinations[topIndex].map(
+    (addressIndex, driverIndex) => {
+      return {
+        driver: drivers[driverIndex].name,
+        address: addresses[addressIndex].full,
+        suitabilityScore: suitabilityScore(
+          drivers[driverIndex],
+          addresses[addressIndex]
+        ),
       };
-      addressess.forEach((address: Address, addressIndex: number) => {
-        const ss = suitabilityScore(driver, address);
-        if (ss > topSuitabilityMatch.score) {
-          topSuitabilityMatch = {
-            driver: driverIndex,
-            address: addressIndex,
-            score: ss,
-          };
-        }
-      });
-      topSuitabilityMatches.push(topSuitabilityMatch);
-    });
-
-    // Get single highest possible match and add to matches
-    let topSuitabilityMatch: SuitabilityMatch = topSuitabilityMatches[0];
-    topSuitabilityMatches.forEach((match) => {
-      if (match.score > topSuitabilityMatch.score) {
-        topSuitabilityMatch = match;
-      }
-    });
-    const match = {
-      driver: drivers[topSuitabilityMatch.driver].name,
-      address: addressess[topSuitabilityMatch.address].full,
-      suitabilityScore: topSuitabilityMatch.score,
-    };
-    matches.push(match);
-
-    // Remove matched driver and address from matching pools for next iteration or to trigger end of loop
-    drivers = drivers.filter(
-      (_, index) => index !== topSuitabilityMatch.driver
-    );
-    addressess = addressess.filter(
-      (_, index) => index !== topSuitabilityMatch.address
-    );
-  }
-  return {
-    matches,
-    leftoverDrivers: drivers,
-    leftoverAddresses: addressess,
-  };
+    }
+  );
+  return matches;
 }
 
 /**
@@ -121,7 +122,7 @@ function runAssignments(
   driverNames: string = "",
   streetAddresses: string = "",
   log: boolean = false
-): Assignments {
+): DriverAddressMatch[] {
   // determine if streetAddresses and driverNames are input file names or input data
   const isFileRegExp = /\w+\.\w+$/;
   const driverInput = driverNames.trim().match(isFileRegExp) ? "" : driverNames;
@@ -137,10 +138,13 @@ function runAssignments(
     setStreetAddressesInput(streetAddresses);
   }
   // process input files and/or input data
-  const assignments: Assignments = getAssignments(driverInput, addressInput);
+  const assignments: DriverAddressMatch[] = getAssignments(
+    driverInput,
+    addressInput
+  );
 
   // log error if no assignments or leftovers
-  if ( assignments.matches.length + assignments.leftoverAddresses.length + assignments.leftoverDrivers.length === 0 ) {
+  if (assignments.length === 0) {
     console.error(
       "\u001b[31m",
       "No assignments made due to bad or no data",
@@ -172,4 +176,4 @@ function runAssignments(
   return assignments;
 }
 
-export { getAssignments, runAssignments, Assignments, DriverAddressMatch };
+export { getAssignments, runAssignments, DriverAddressMatch };
