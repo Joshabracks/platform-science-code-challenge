@@ -1,23 +1,3 @@
-import { Driver } from "./driver";
-import { Address } from "./address";
-
-/**
- * Gets the number of vowels in a word
- * @param word
- * @returns number
- */
-function countVowels(word: string): number {
-  const vowels = "aeiouAEIOU";
-  let count = 0;
-  for (let i = 0; i < word.length; i++) {
-    const char = word.charAt(i);
-    if (vowels.indexOf(char) !== -1 && char !== " ") {
-      count++;
-    }
-  }
-  return count;
-}
-
 /**
  * Gets the greatest common divisor shared between two numbers
  * @param x number
@@ -41,7 +21,7 @@ function greatestCommonDivisor(x: number, y: number): number {
  * @param destination - Address
  * @returns number
  */
-function suitabilityScore(driver: Driver, destination: Address): number {
+function suitabilityScore(driver: string, destination: string): number {
   // Calculate base SS value per the "top-secret algorithm" instructions:
   // ● If the length of the shipment's destination street name is even, the base
   //   suitability score (SS) is the number of vowels in the driver’s name multiplied by
@@ -50,27 +30,28 @@ function suitabilityScore(driver: Driver, destination: Address): number {
   //   number of consonants in the driver’s name multiplied by 1.
   // ● If the length of the shipment's destination street name shares any common
   //   factors (besides 1) with the length of the driver’s name, the SS is increased by
-  //   50% above the base SS 
-
+  //   50% above the base SS
+  
+  const street = destination?.match(/\d+\s([^,]+)/)?.[1]?.trim() || ''
   // Determine base score
-  const streetNameIsEven: boolean = destination.street.length % 2 ? false : true;
-  const vowels: number = countVowels(driver.name);
+  const streetNameIsEven: boolean =
+    street.length % 2 ? false : true;
   const baseLetterCount: number = streetNameIsEven
-    ? vowels
-    : driver.nameCondensed.length - vowels; // consonants
-  const baseMultiplier: number = streetNameIsEven ? 1.5 : 1;
-  const base: number = baseLetterCount * baseMultiplier;
+    ? driver.match(/[aeiou]/gi)?.length || 0 // vowel count
+    : driver.match(/[bcdfghj-np-tv-z]/gi)?.length || 0; // consonant count
+  const base: number = streetNameIsEven
+    ? baseLetterCount * 1.5
+    : baseLetterCount;
 
   // Determine if common factors exist
-  const streetNameLength: number = destination.street.length;
-  const driverNameLength: number = driver.name.length;
+  const streetNameLength: number = street.length;
+  const driverNameLength: number = driver.length;
   const gcd: number = greatestCommonDivisor(streetNameLength, driverNameLength);
   const hasCommonFactors: boolean =
     gcd > 1 && gcd !== streetNameLength && gcd !== driverNameLength;
 
-    // set suitability score and apply 50% increase if common factors exist
+  // set suitability score and apply 50% increase if common factors exist
   const ss: number = hasCommonFactors ? base * 1.5 : base;
-
   return ss;
 }
 

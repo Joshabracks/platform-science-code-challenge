@@ -23,8 +23,8 @@ const SS_CASES = [
         // base SS: 9
         // common factors (other than 1): none
         // No further multipliers: use base SS (9)
-        driver: { name: 'Daniel Davidson', nameCondensed: 'danieldavidson' },
-        address: { number: 44, street: 'Fake Dr.', city: 'San Diego', state: 'CA', zip: 92122 },
+        driver: 'Daniel Davidson',
+        address: '44 Fake Dr., San Diego, CA, 92122',
         expect: 9
     },
     // Further test cases only have information required to run the suitabilityScore function properly
@@ -38,8 +38,8 @@ const SS_CASES = [
         // base SS: 6
         // common factors (other than 1): 2
         // 6 * 1.5 = 9
-        driver: { name: 'Bob Dolewhip', nameCondensed: 'bobdolewhip' },
-        address: { street: 'Moneybags Lane' },
+        driver: 'Bob Dolewhip',
+        address: '123 Moneybags Lane, Williamsburg, IN, 55555',
         expect: 9
     },
     {
@@ -51,8 +51,8 @@ const SS_CASES = [
         // base SS: 4
         // common factors (other than 1): none
         // No further multipliers: use base SS (4)
-        driver: { name: 'Bob Obb', nameCondensed: 'bobobb' },
-        address: { street: 'Paseo Roberto' },
+        driver: 'Bob Obb',
+        address: ' 990 Paseo Roberto, Singleton, WA, 49813',
         expect: 4
     },
     {
@@ -65,8 +65,8 @@ const SS_CASES = [
         // 7 * 1.5 = 10.5
         // common factors (other than 1): 7
         // 10.5 * 1.5 = 15.75
-        driver: { name: 'Joshua Almanza Bracks', nameCondensed: 'joshuaalmanzabracks' },
-        address: { street: 'Corona Del Mar' },
+        driver: 'Joshua Almanza Bracks',
+        address: '405 Corona Del Mar, Someplace, CA, 91710',
         expect: 15.75
     }
 ]

@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
-import { getStreetAddresses, Address } from "./address";
-import { getDrivers, Driver } from "./driver";
+import { getStreetAddresses } from "./address";
+import { getDrivers } from "./driver";
 import { OUTPUT_FILE, setDriverInput, setStreetAddressesInput } from "./env";
 import { suitabilityScore } from "./suitabilityScore";
 
@@ -9,7 +9,6 @@ import { suitabilityScore } from "./suitabilityScore";
 interface DriverAddressMatch {
   driver: string;
   address: string;
-  suitabilityScore: number;
 }
 
 /**
@@ -21,20 +20,20 @@ interface DriverAddressMatch {
  *            The place in the array represents the driver index and the actual number represents the address index
  */
 function getNumericalCombinations(
-  addressCount: number,
-  driverCount: number,
-  current: number[] = []
+  drivers: string[],
+  addresses: string[],
+  current: number[] = [],
 ): number[][] {
-  if (current.length === driverCount) {
+  if (current.length === drivers.length) {
     return [current];
   }
   let results: number[][] = [];
-  for (let i = 0; i < addressCount; i++) {
+  for (let i = 0; i < addresses.length; i++) {
     if (current.indexOf(i) === -1) {
       const next = structuredClone(current);
       next.push(i);
       results = results.concat(
-        getNumericalCombinations(addressCount, driverCount, next)
+        getNumericalCombinations(drivers, addresses, next)
       );
     }
   }
@@ -55,13 +54,13 @@ function getNumericalCombinations(
 function getAssignments(
   driverInput: string = "",
   addressInput: string = ""
-): DriverAddressMatch[] {
+): {ss: number, matches: DriverAddressMatch[]} {
   // get drivers and addresses from files
-  const drivers: Driver[] = getDrivers(driverInput);
-  const addresses: Address[] = getStreetAddresses(addressInput);
+  const drivers: string[] = getDrivers(driverInput);
+  const addresses: string[] = getStreetAddresses(addressInput);
   const possibleCombinations = getNumericalCombinations(
-    drivers.length,
-    addresses.length
+    drivers,
+    addresses
   );
 
   let topIndex = 0;
@@ -86,8 +85,8 @@ function getAssignments(
   const matches: DriverAddressMatch[] = possibleCombinations[topIndex].map(
     (addressIndex, driverIndex) => {
       return {
-        driver: drivers[driverIndex].name,
-        address: addresses[addressIndex].full,
+        driver: drivers[driverIndex] || '',
+        address: addresses[addressIndex],
         suitabilityScore: suitabilityScore(
           drivers[driverIndex],
           addresses[addressIndex]
@@ -95,7 +94,7 @@ function getAssignments(
       };
     }
   );
-  return matches;
+  return { ss: topScore, matches };
 }
 
 /**
@@ -122,7 +121,7 @@ function runAssignments(
   driverNames: string = "",
   streetAddresses: string = "",
   log: boolean = false
-): DriverAddressMatch[] {
+): {ss: number, matches: DriverAddressMatch[]} {
   // determine if streetAddresses and driverNames are input file names or input data
   const isFileRegExp = /\w+\.\w+$/;
   const driverInput = driverNames.trim().match(isFileRegExp) ? "" : driverNames;
@@ -138,13 +137,13 @@ function runAssignments(
     setStreetAddressesInput(streetAddresses);
   }
   // process input files and/or input data
-  const assignments: DriverAddressMatch[] = getAssignments(
+  const assignments = getAssignments(
     driverInput,
     addressInput
   );
 
   // log error if no assignments or leftovers
-  if (assignments.length === 0) {
+  if (assignments.matches.length === 0) {
     console.error(
       "\u001b[31m",
       "No assignments made due to bad or no data",
