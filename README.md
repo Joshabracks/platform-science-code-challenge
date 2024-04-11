@@ -60,7 +60,11 @@ Under the data folder, you'll find two files:
   - **parameters**: 
     - **driverInput**: string (OPTIONAL) - Line separated list of driver names or file path.  if not provided, the program will attempt to fetch the value from .env or default specified files.  If a filepath is given, the file must have a file extension, or it the program will attempt to read it as a list instead of fetching from the file.
     - **addressInput**:  string (OPTIONAL) - Line separated list of destination street addresses or filepath. if not provided, the program will attempt to fetch the value form .env or default specified files.  If a filepath is given, the file must have a file extension, or it the program will attempt to read it as a list instead of fetching from the file.
-  - **returns**: [DriverAddressMatch](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L16)[ ] - set of driver / address matches with suitablity scores
+  - **returns**:
+    - ss: number
+    - matches: Array[]
+      - driver: string
+      - address: string
 
 - [runAssignments](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L36): Gets StreetAddress and Driver values from files or pre-set values and creates assigns drivers to destination addresses at a 1 to 1 ration, as available Assignments (along with any leftover drivers or addresses) are thn either logged to console and/or exported to a file and returned
   - **parameters**:
@@ -69,7 +73,11 @@ Under the data folder, you'll find two files:
     - **driverNames**: string - changes the input file path for driver names.  This can also be set in the .env file as DRIVER_NAMES. default DRIVER_NAMES value is '../data/DriverNames.txt' which targets the data folder of the project level (Sibling level of the project build)
     - **streetAddresses**: string - changes in input file path for street addresses.  This can also be set in the .env file as STREET_ADDRESSES. default STREET_ADDRESSES value is '../data/StreetAddresses.txt' which targets the data folder of the project level (Sibling level of the project build)
     - **log**: boolean - if set to true, results will be logged to the console
-  - **returns**: [DriverAddressMatch](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/src/assignments.ts#L16)[ ] - set of driver / address matches with suitablity scores
+  - **returns**:
+    - ss: number
+    - matches: Array[]
+      - driver: string
+      - address: string
 
 ### Advanced CLI commands
 node allows exported functions to be run directly from the command line.  As a result, you can run the `runAssignments` function from the cli using `node -e` command.  (see the [package.json](https://github.com/Joshabracks/platform-science-code-challenge/blob/main/package.json#L11) "start" script for a simple example).  The syntax for calling the function is JavaScript and must start by requiring the file you wish to export from.  (In this case, it is `./build/index.js`)
